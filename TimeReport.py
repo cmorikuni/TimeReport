@@ -16,7 +16,7 @@ excel_filename = "Timesheet_Report.xlsx"
 harvest_headers = {
 	'Content-type': 'application/json',
 	'Accept': 'application/json',
-	'Authorization': 'Basic Y21vcmlrdW5pQHJldmFjb21tLmNvbToqNjAlaEZ4ViVSWHU='
+	'Authorization': ''
 }
 
 hoursForAcceptance = 5
