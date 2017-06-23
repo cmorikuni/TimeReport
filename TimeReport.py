@@ -1,15 +1,12 @@
 from __future__ import division
-from collections import OrderedDict
 from openpyxl import Workbook
 from openpyxl import load_workbook
-from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
+from openpyxl.styles import PatternFill, Font
 from datetime import date, timedelta, datetime
 import os
-import sys
 import requests
-import json
-import re
 import argparse
+import contextlib
 
 excel_filename = "Timesheet_Report.xlsx"
 
@@ -35,6 +32,7 @@ totalsFont = Font(name='Calibri',
 					bold=True)
 text = Font(name='Calibri',
 					size=12)
+
 
 def init():
 	# Harvest - Build request & load projects
@@ -84,6 +82,7 @@ def peopleTime(date):
 	return (fteTime, contTime)
 
 
+@contextlib.contextmanager
 def openExcel(filename, weekSheetName, fteTime, contTime):
 	wb = None
 	ws = None
@@ -152,10 +151,7 @@ def openExcel(filename, weekSheetName, fteTime, contTime):
 			dayTotArea = chr(ordCol) + str(formRowStart) + ':' + chr(ordCol) + str(formRowEnd)
 			ws[chr(ordCol) + str(row)] = "=SUM(" + dayTotArea + ")/COUNT(" + dayTotArea + ")"
 			ws[chr(ordCol) + str(row)].number_format = '0%'
-	return (wb, ws)
-
-
-def closeExcel(wb, filename):
+	yield (wb, ws)
 	wb.save(filename)
 
 
@@ -226,6 +222,5 @@ if __name__ == '__main__':
 
 	(fteTime, contTime) = peopleTime(yesterday)
 
-	wb, ws = openExcel(excel_filename, startOfWeekFmt, fteTime, contTime)
-	outputToExcel(ws, dayOfWeek, fteTime, contTime, ignoreList)
-	closeExcel(wb, excel_filename)
+	with openExcel(excel_filename, startOfWeekFmt, fteTime, contTime) as (wb, ws):
+		outputToExcel(ws, dayOfWeek, fteTime, contTime, ignoreList)
